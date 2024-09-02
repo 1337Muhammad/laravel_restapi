@@ -20,16 +20,21 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         // dd($request->query());
-        $filter = new CustomersFilter();
-        $queryItems = $filter->transform($request); // [['column', 'operator', 'value']]   --> [ [],[],[] ]  --> accept multiple filters
+        $filter      = new CustomersFilter();
+        $filterItems = $filter->transform($request);  // [['column', 'operator', 'value']]   --> [ [],[],[] ]  --> accept multiple filters
 
-        if (count($queryItems) == 0) {
-        // dd($queryItems);
-            return new CustomerCollection(Customer::paginate());
-        } else {
-            $customers = Customer::where($queryItems)->paginate();
-            return new CustomerCollection($customers->appends($request->query()));
+        // check if includeInvoices is in user query
+        $includeInvoices = $request->query('includeInvoices');
+
+        // if Customer::where( [] ) has an empty array --> then it will just act as its not here
+        $customers = Customer::where($filterItems);
+
+        // if with invoices then get append invoices
+        if ($includeInvoices) {
+            $customers = $customers->with('invoices');
         }
+
+        return new CustomerCollection($customers->paginate()->appends($request->query()));
     }
 
     /**
@@ -53,7 +58,16 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        return new CustomerResource($customer);
+        $customer = new CustomerResource($customer);
+
+        // check if includeInvoices is in user query
+        $includeInvoices = request()->query('includeInvoices');
+
+        if($includeInvoices){
+            $customer = $customer->loadMissing('invoices');
+        }
+
+        return $customer;
     }
 
     /**
