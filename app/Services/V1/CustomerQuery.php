@@ -61,7 +61,7 @@ class CustomerQuery
             }
         }
 
-dd($request->query(), $eloQuery);
+// dd($request->query(), $eloQuery);
 
 
         return $eloQuery;
