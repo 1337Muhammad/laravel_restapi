@@ -3,20 +3,32 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Customer;
+use Illuminate\Http\Request;
+use App\Services\V1\CustomerQuery;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Resources\V1\CustomerResource;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\V1\CustomerCollection;
-use App\Http\Resources\V1\CustomerResource;
+use Illuminate\Support\Facades\Redis;
 
 class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new CustomerCollection(Customer::paginate());
+        // dd($request->query());
+        $filter = new CustomerQuery();
+        $queryItems = $filter->transform($request); // [['column', 'operator', 'value']]   --> [ [],[],[] ]  --> accept multiple filters
+
+        if (count($queryItems) == 0) {
+        // dd($queryItems);
+            return new CustomerCollection(Customer::paginate());
+        } else {
+            return new CustomerCollection(Customer::where($queryItems)->paginate());
+        }
     }
 
     /**
