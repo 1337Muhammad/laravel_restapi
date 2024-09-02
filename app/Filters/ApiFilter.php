@@ -1,37 +1,20 @@
 <?php
 
-namespace App\Services\V1;
+namespace App\Filters;
 
 use Illuminate\Http\Request;
 
-class CustomerQuery
+class ApiFilter
 {
-    // allowed parameters to accept from user and is assigned to it's allowed comparison 
+    // allowed parameters to accept from user
     // whitelisting the allowed params
-    protected $allowedParms = [
-        // 'id' => ['eq', 'gt', 'lt'],
-        'name' => ['eq'],
-        'type' => ['eq'],
-        'email' => ['eq'],
-        'address' => ['eq'],
-        'city' => ['eq'],
-        'state' => ['eq'],
-        'postalCode' => ['eq', 'gt', 'lt'],
-    ];
+    protected $allowedParms = [];
 
     // transform user input format to its column name
-    protected $columnMap = [
-        'postalCode' => 'postal_code'
-    ];
+    protected $columnMap = [];
 
     // transform operators from strings to its signs
-    protected $operatorMap = [
-        'eq' => '=',
-        'gt' => '>',
-        'gte' => '>=',
-        'lt' => '<',
-        'lte' => '<=',
-    ];
+    protected $operatorMap = [];
 
     // transform the query to eloquent query that
     public function transform(Request $request) {
