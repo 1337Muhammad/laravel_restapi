@@ -54,7 +54,7 @@ class CustomerController extends Controller
         // check if includeInvoices is in user query
         $includeInvoices = request()->query('includeInvoices');
 
-        if($includeInvoices){
+        if ($includeInvoices) {
             $customer = $customer->loadMissing('invoices');
         }
 
@@ -74,6 +74,10 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        if ($customer)
+            $customer->delete();
+        else
+            return response()->json("Error");
+        return response()->json("Customer Deleted");
     }
 }
