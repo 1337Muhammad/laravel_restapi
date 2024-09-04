@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api\V1;
 use App\Filters\V1\InvoicesFilter;
 use App\Models\Invoice;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\BulkStoreInvoiceRequest;
 use App\Http\Requests\V1\StoreInvoiceRequest;
 use App\Http\Requests\V1\UpdateInvoiceRequest;
 use App\Http\Resources\V1\InvoiceCollection;
 use App\Http\Resources\V1\InvoiceResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class InvoiceController extends Controller
 {
@@ -25,7 +27,6 @@ class InvoiceController extends Controller
             return new InvoiceCollection(Invoice::paginate());
         } else {
             $invoices = Invoice::where($filterItems)->paginate();
-            // dd($invoices);
             return new InvoiceCollection($invoices->appends($request->query()));
         }
     }
@@ -44,6 +45,17 @@ class InvoiceController extends Controller
     public function store(StoreInvoiceRequest $request)
     {
         //
+    }
+
+    public function bulkStore(BulkStoreInvoiceRequest $request)
+    {
+        // converting the request to a collection --> to remove the json representation varaibles customerId,... --> to be able to query it in bulk
+        $bulk = collect($request->all())->map(function ($arr, $key) {
+            return Arr::except($arr, ['customerId', 'billedDate', 'paidDate']);
+        });
+
+        // reverting back to array and store into db
+        Invoice::insert($bulk->toArray());
     }
 
     /**
